@@ -5,9 +5,62 @@ import os
 TMUX_CONFIG = os.path.expanduser("~/.tmux.conf")
 
 plugins = "# List of plugins"
-binding = "\n# Control settings"
-theme = "\n# Catppuccin settings"
-run = "\n# Run commands"
+binding = "\n\n# Control settings"
+theme = "\n\n# Catppuccin settings"
+run = "\n\n# Run commands"
+
+
+def checkForExistingConfig():
+    if os.path.exists(TMUX_CONFIG):
+        if_overwrite = input("⚠️  Config file already exists. Overwrite? (y/n): ").lower()
+        if if_overwrite == 'n':
+            print("\n❌ Ending script...")
+            exit(0)
+        os.remove(TMUX_CONFIG)
+        print("🗑️  Old config removed.")
+
+def pluginsInstall(plugins, run):
+    print("\n📦 Plugins installation")
+    tpm = input("› Install tpm (plugin manager)? (y/n): ").lower()
+    if tpm == 'y':
+        plugins += "\nset -g @plugin 'tmux-plugins/tpm'"
+        run += "\nrun '~/.tmux/plugins/tpm/tpm'"
+
+    sensible = input("› Install sensible? (y/n): ").lower()
+    if sensible == 'y':
+        plugins += "\nset -g @plugin 'tmux-plugins/tmux-sensible'"
+
+    continuum = input("› Install continuum? (y/n): ").lower()
+    if continuum == 'y':
+        plugins += "\nset -g @plugin 'tmux-plugins/tmux-continuum'"
+
+    resurrect = input("› Install resurrect? (y/n): ").lower()
+    if resurrect == 'y':
+        plugins += "\nset -g @plugin 'tmux-plugins/tmux-resurrect'"
+    return plugins, run
+
+
+def shortcutsSettings(binding):
+    mouse = input("\n🖱️  Enable mouse support? (y/n): ").lower()
+    if mouse == 'y':
+        binding += "\nset -g mouse on"
+
+    print("\n⌨️  Choose keyboard shortcuts style:")
+    print(" 1 - emacs (default)")
+    print(" 2 - vi")
+    shortcuts = input("› Your choice: ") or "1"
+    if shortcuts == "2":
+        binding += "\nset -g mode-keys vi"
+        binding += "\nset -g status-keys vi"
+        binding += "\nbind h select-pane -L"
+        binding += "\nbind j select-pane -D"
+        binding += "\nbind k select-pane -U"
+        binding += "\nbind l select-pane -R"
+        y_copy = input("› Use 'y' in copy mode to copy to clipboard? (y/n): ").lower()
+        if y_copy == 'y':
+            binding += '\nbind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -selection clipboard -in"'
+    return binding
+
 
 def configureCatppuccin(plugins, theme, run):
     print("\n🎨 Catppuccin theme configuration")
@@ -65,54 +118,14 @@ def configureCatppuccin(plugins, theme, run):
     return plugins, theme, run
 
 
-print("🌀 tmux configuration setup\n")
-
-if os.path.exists(TMUX_CONFIG):
-    if_overwrite = input("⚠️  Config file already exists. Overwrite? (y/n): ").lower()
-    if if_overwrite == 'n':
-        print("\n❌ Ending script...")
-        exit(0)
-    os.remove(TMUX_CONFIG)
-    print("🗑️  Old config removed.")
+print("Tmux configuration setup\n")
+checkForExistingConfig()
 
 with open(TMUX_CONFIG, 'w') as f:
     pass
 
-mouse = input("\n🖱️  Enable mouse support? (y/n): ").lower()
-if mouse == 'y':
-    binding += "\nset -g mouse on"
-
-print("\n⌨️  Choose keyboard shortcuts style:")
-print(" 1 - emacs (default)")
-print(" 2 - vi")
-shortcuts = input("› Your choice: ") or "1"
-if shortcuts == "2":
-    binding += "\nbind h select-pane -L"
-    binding += "\nbind j select-pane -D"
-    binding += "\nbind k select-pane -U"
-    binding += "\nbind l select-pane -R"
-    y_copy = input("› Use 'y' in copy mode to copy to clipboard? (y/n): ").lower()
-    if y_copy == 'y':
-        binding += '\nbind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -selection clipboard -in"'
-
-print("\n📦 Plugins installation")
-tpm = input("› Install tpm (plugin manager)? (y/n): ").lower()
-if tpm == 'y':
-    plugins += "\nset -g @plugin 'tmux-plugins/tpm'"
-    run += "\nrun '~/.tmux/plugins/tpm/tpm'"
-
-sensible = input("› Install sensible? (y/n): ").lower()
-if sensible == 'y':
-    plugins += "\nset -g @plugin 'tmux-plugins/tmux-sensible'"
-
-continuum = input("› Install continuum? (y/n): ").lower()
-if continuum == 'y':
-    plugins += "\nset -g @plugin 'tmux-plugins/tmux-continuum'"
-
-resurrect = input("› Install resurrect? (y/n): ").lower()
-if resurrect == 'y':
-    plugins += "\nset -g @plugin 'tmux-plugins/tmux-resurrect'"
-
+binding = shortcutsSettings(binding)
+plugins, run = pluginsInstall(plugins, run)
 plugins, theme, run = configureCatppuccin(plugins, theme, run)
 
 file_content = plugins + binding + theme + run
