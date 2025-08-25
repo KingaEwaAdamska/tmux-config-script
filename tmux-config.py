@@ -1,5 +1,5 @@
-
 #!/usr/bin/env python3
+import subprocess
 from pathlib import Path
 
 TMUX_CONFIG = Path("~/.tmux.conf").expanduser()
@@ -25,6 +25,13 @@ def pluginsInstall(plugins, run):
     if tpm == 'y':
         plugins += "\nset -g @plugin 'tmux-plugins/tpm'"
         run += "\nrun '~/.tmux/plugins/tpm/tpm'"
+
+    tpm_path = Path("~/.tmux/plugins/tpm").expanduser()
+    if not tpm_path.exists():
+        print("🔄 Cloning TPM...")
+        subprocess.run(["git", "clone", "https://github.com/tmux-plugins/tpm", str(tpm_path)])
+    else:
+        print("✅ TPM already installed.")
 
     sensible = input("› Install sensible? (y/n): ").lower()
     if sensible == 'y':
