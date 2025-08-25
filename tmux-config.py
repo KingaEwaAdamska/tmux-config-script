@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 import os
 
@@ -5,16 +6,24 @@ TMUX_CONFIG = os.path.expanduser("~/.tmux.conf")
 
 plugins = "# List of plugins"
 binding = "\n# Control settings"
-theme="\n# Catppuccin settings"
+theme = "\n# Catppuccin settings"
 run = "\n# Run commands"
 
 def configureCatppuccin(plugins, theme, run):
-    catppuccin = input("Install Catppuccin? (y/n)").lower()
+    print("\n🎨 Catppuccin theme configuration")
+    catppuccin = input("› Install Catppuccin? (y/n): ").lower()
     if catppuccin == 'n':
-        return
+        return plugins, theme, run
+
     plugins += "\nset -g @plugin 'catppuccin/tmux#v2.1.3'"
     run += "\nrun ~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux"
-    flavor = input("Choose Catppuccin flavor: \n 1 - 🌻 Latte\n 2 - 🪴 Frappe\n 3 - 🌺 Macchiato\n 4 - 🌿 Mocha \n(default 4): ")
+
+    print("\nChoose Catppuccin flavor:")
+    print(" 1 - 🌻 Latte")
+    print(" 2 - 🪴 Frappe")
+    print(" 3 - 🌺 Macchiato")
+    print(" 4 - 🌿 Mocha (default)")
+    flavor = input("› Your choice: ")
     theme += "\nset -g @catppuccin_flavor "
     match flavor:
         case "1":
@@ -25,8 +34,13 @@ def configureCatppuccin(plugins, theme, run):
             theme += "'macchiato'"
         case _:
             theme += "'mocha'"
-    
-    window_status_style = input("Window status style:\n 1 - basic\n 2 - rounded\n 3 - slanted\n 4 - none\n(default 1):")
+
+    print("\nWindow status style:")
+    print(" 1 - basic (default)")
+    print(" 2 - rounded")
+    print(" 3 - slanted")
+    print(" 4 - none")
+    window_status_style = input("› Your choice: ")
     theme += "\nset -g @catppuccin_window_status_style "
     match window_status_style:
         case "2":
@@ -50,44 +64,52 @@ def configureCatppuccin(plugins, theme, run):
     theme += '\nset -g @catppuccin_window_current_text "#W"'
     return plugins, theme, run
 
+
+print("🌀 tmux configuration setup\n")
+
 if os.path.exists(TMUX_CONFIG):
-    if_overwrite = input("Do you want to overwrite actual config? (y/n) ").lower()
+    if_overwrite = input("⚠️  Config file already exists. Overwrite? (y/n): ").lower()
     if if_overwrite == 'n':
-        print("Ending script...")
+        print("\n❌ Ending script...")
         exit(0)
     os.remove(TMUX_CONFIG)
+    print("🗑️  Old config removed.")
 
 with open(TMUX_CONFIG, 'w') as f:
     pass
 
-mouse = input("Set mouse on? (y/n) ").lower()
+mouse = input("\n🖱️  Enable mouse support? (y/n): ").lower()
 if mouse == 'y':
     binding += "\nset -g mouse on"
 
-shortcuts = input("Choose type of keyboard shortcuts (1-emacs, 2-vi, default:1) ") or "1"
+print("\n⌨️  Choose keyboard shortcuts style:")
+print(" 1 - emacs (default)")
+print(" 2 - vi")
+shortcuts = input("› Your choice: ") or "1"
 if shortcuts == "2":
     binding += "\nbind h select-pane -L"
     binding += "\nbind j select-pane -D"
     binding += "\nbind k select-pane -U"
     binding += "\nbind l select-pane -R"
-    y_copy = input("Do you want to use y in copy mode to copy to clipboard? (y/n) ").lower()
+    y_copy = input("› Use 'y' in copy mode to copy to clipboard? (y/n): ").lower()
     if y_copy == 'y':
         binding += '\nbind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "xclip -selection clipboard -in"'
 
-tpm = input("Install tpm? (y/n) ").lower()
+print("\n📦 Plugins installation")
+tpm = input("› Install tpm (plugin manager)? (y/n): ").lower()
 if tpm == 'y':
-    plugins += "\nset -g @plugin 'tmux-plugins/tpm"
-    run += "\nrun '~/.tmux/plugins/tpm/tpm"
-    
-sensible = input("Install sensible? (y/n)").lower()
+    plugins += "\nset -g @plugin 'tmux-plugins/tpm'"
+    run += "\nrun '~/.tmux/plugins/tpm/tpm'"
+
+sensible = input("› Install sensible? (y/n): ").lower()
 if sensible == 'y':
     plugins += "\nset -g @plugin 'tmux-plugins/tmux-sensible'"
 
-continuum = input("Install continuum? (y/n)").lower()
+continuum = input("› Install continuum? (y/n): ").lower()
 if continuum == 'y':
     plugins += "\nset -g @plugin 'tmux-plugins/tmux-continuum'"
 
-resurrect = input("Install resurrect? (y/n)").lower()
+resurrect = input("› Install resurrect? (y/n): ").lower()
 if resurrect == 'y':
     plugins += "\nset -g @plugin 'tmux-plugins/tmux-resurrect'"
 
@@ -96,3 +118,7 @@ plugins, theme, run = configureCatppuccin(plugins, theme, run)
 file_content = plugins + binding + theme + run
 with open(TMUX_CONFIG, 'a') as f:
     f.write(file_content)
+
+print("\n✅ Configuration written to", TMUX_CONFIG)
+print("💡 Start tmux and press prefix + I to install plugins.")
+
