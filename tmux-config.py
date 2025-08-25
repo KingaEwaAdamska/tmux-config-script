@@ -1,8 +1,8 @@
 
 #!/usr/bin/env python3
-import os
+from pathlib import Path
 
-TMUX_CONFIG = os.path.expanduser("~/.tmux.conf")
+TMUX_CONFIG = Path("~/.tmux.conf").expanduser()
 
 plugins = "# List of plugins"
 binding = "\n\n# Control settings"
@@ -11,12 +11,12 @@ run = "\n\n# Run commands"
 
 
 def checkForExistingConfig():
-    if os.path.exists(TMUX_CONFIG):
+    if TMUX_CONFIG.exists():
         if_overwrite = input("⚠️  Config file already exists. Overwrite? (y/n): ").lower()
         if if_overwrite == 'n':
             print("\n❌ Ending script...")
             exit(0)
-        os.remove(TMUX_CONFIG)
+        TMUX_CONFIG.unlink()
         print("🗑️  Old config removed.")
 
 def pluginsInstall(plugins, run):
@@ -121,16 +121,12 @@ def configureCatppuccin(plugins, theme, run):
 print("Tmux configuration setup\n")
 checkForExistingConfig()
 
-with open(TMUX_CONFIG, 'w') as f:
-    pass
-
 binding = shortcutsSettings(binding)
 plugins, run = pluginsInstall(plugins, run)
 plugins, theme, run = configureCatppuccin(plugins, theme, run)
 
 file_content = plugins + binding + theme + run
-with open(TMUX_CONFIG, 'a') as f:
-    f.write(file_content)
+TMUX_CONFIG.write_text(file_content)
 
 print("\n✅ Configuration written to", TMUX_CONFIG)
 print("💡 Start tmux and press prefix + I to install plugins.")
